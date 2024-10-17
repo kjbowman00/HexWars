@@ -106,14 +106,8 @@ function gather(player, DIST_NEEDED, PID) {
 		let distSq = (player.x - orb.x) * (player.x - orb.x);
 		distSq += (player.y - orb.y) * (player.y - orb.y);
 		if (distSq <= DIST_NEEDED && !orb.playersSeen.includes(PID)) {
-			let buff = new ArrayBuffer(8);
-			let byte16 = new Int16Array(buff);
-			byte16[0] = Math.round(orb.x);
-			byte16[1] = Math.round(orb.y);
-			byte16[2] = Math.round(orb.xToGo);
-			byte16[3] = Math.round(orb.yToGo);
 			orbsToSend.set(id, {
-				pos: buff,
+				pos: {x: orb.x, y: orb.y, xToGo: orb.xToGo, yToGo: orb.yToGo},
 				color: orb.color
 			});
 			orb.playersSeen.push(PID);

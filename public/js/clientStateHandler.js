@@ -2,6 +2,7 @@ let loopID;
 var gameRunning = false;
 var menuRunning = true;
 function gameStart() {
+	console.log("STARTING GAME");
 	alive = true;
 	//Turn on canvas
 	document.getElementById('canvas_holder').style.display = 'block';

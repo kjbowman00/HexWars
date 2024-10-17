@@ -236,11 +236,8 @@ var update = function (deltaTime, io) {
 				currentPlayer.timeDead += deltaTime;
 				if (currentPlayer.timeDead > 60) {
 					//Remove them from the server
-					let clientSocket = io.sockets.connected[key];
-					if (clientSocket != undefined) {
-						clientSocket.disconnect();
-						playersToKick.push(currentPlayer);
-					}
+					io.kickPlayer(key);
+					playersToKick.push(currentPlayer);
 				}
 			}
 		}
@@ -292,11 +289,7 @@ function isPowerupActive(type, player) {
 
 function getSelfStripped(player) {
 	let stripped = {};
-	let buff1 = new ArrayBuffer(4);
-	let posArray = new Int16Array(buff1);
-	posArray[0] = Math.round(player.x);
-	posArray[1] = Math.round(player.y);
-	stripped.pos = buff1;
+	stripped.pos = {x: player.x, y: player.y};
 	stripped.health = Math.round(player.health);
 	stripped.maxHealth = player.maxHealth;
 	stripped.orbs = player.orbs;
@@ -308,19 +301,9 @@ function getSelfStripped(player) {
 	stripped.activePowerups = player.activePowerups;
 	let upgrades = player.upgrades;
 	if (player.lastState == null) {
-		let buff2 = new ArrayBuffer(upgrades.length);
-		let upgradeArray = new Int8Array(buff2);
-		for (let i = 0; i < upgradeArray.length; i++) {
-			upgradeArray[i] = upgrades[i];
-		}
-		stripped.upgrades = upgradeArray;
+		stripped.upgrades = upgrades;
 	} else if (arrayEquals(upgrades, player.lastState.upgrades)) {
-		let buff2 = new ArrayBuffer(upgrades.length);
-		let upgradeArray = new Int8Array(buff2);
-		for (let i = 0; i < upgradeArray.length; i++) {
-			upgradeArray[i] = upgrades[i];
-		}
-		stripped.upgrades = upgradeArray;
+		stripped.upgrades = upgrades;
 	}
 	if (player.playersJustKilled.length > 0) {
 		stripped.playersJustKilled = player.playersJustKilled;
@@ -333,34 +316,18 @@ function getStrippedPlayer(player, neverSeen) {
 	let stripped = {};
 	if (neverSeen || player.lastState == null) {
 		//Send everything
-		let buff1 = new ArrayBuffer(4);
-		let posArray = new Int16Array(buff1);
-		posArray[0] = Math.round(player.x);
-		posArray[1] = Math.round(player.y);
-		stripped.pos = buff1;
-
+		stripped.pos = {x: player.x, y:player.y};
 		stripped.health = Math.round(player.health);
 		stripped.maxHealth = Math.round(player.maxHealth);
 		stripped.gun = {};
 		stripped.gun.rotation = parseFloat(player.gun.rotation.toFixed(2));
 		stripped.color = player.color;
 		stripped.name = player.name;
-
-		let upgrades = player.upgrades;
-		let buff2 = new ArrayBuffer(upgrades.length);
-		let upgradeArray = new Int8Array(buff2);
-		for (let i = 0; i < upgradeArray.length; i++) {
-			upgradeArray[i] = upgrades[i];
-		}
-		stripped.upgrades = upgradeArray;
+		stripped.upgrades = player.upgrades;
 	} else {
 		//Only send stuff if changed from last send state
 		//Package up into 16 bit integers
-		let buff1 = new ArrayBuffer(4);
-		let posArray = new Int16Array(buff1);
-		posArray[0] = Math.round(player.x);
-		posArray[1] = Math.round(player.y);
-		stripped.pos = buff1;
+		stripped.pos = {x: player.x, y:player.y};
 
 		let nHealth = Math.round(player.health);
 		if (nHealth != player.lastState.health) stripped.health = nHealth;
@@ -375,12 +342,7 @@ function getStrippedPlayer(player, neverSeen) {
 
 		let upgrades = player.upgrades;
 		if (arrayEquals(upgrades, player.lastState.upgrades)) {
-			let buff2 = new ArrayBuffer(upgrades.length);
-			let upgradeArray = new Int8Array(buff2);
-			for (let i = 0; i < upgradeArray.length; i++) {
-				upgradeArray[i] = upgrades[i];
-			}
-			stripped.upgrades = upgradeArray;
+			stripped.upgrades = upgrades;
 		}
 	}
 	return stripped;
@@ -471,14 +433,17 @@ var sendUpdates = function (io) {
 			objectsToSend.powerups = [middlePowerup];
 
 			let finalObj = {};
+			finalObj.messageType = 'state';
+			console.log(value);
 			finalObj.player = getSelfStripped(value);
+			console.log(finalObj.player);
 			finalObj.objects = objectsToSend;
 			if (value.lastLeaderBoardState < leaderboard.getStateNum()) {
 				finalObj.leaderboard = leaderboardToSend;
 				value.lastLeaderBoardState = leaderboard.getStateNum();
 			}
 
-			io.to(key).emit('state', finalObj);
+			io.sendMessage(key, finalObj);
 		}
 	});
 	deletedOrbs = [];
