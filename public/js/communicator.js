@@ -3,12 +3,10 @@ var socket;
 
 function onPlay() {
     var form = document.getElementById("name_form");
-    console.log('play');
 	var formData = new FormData(form);
 	socketStuff(formData);
 	return false;
 }
-console.log("ENTERED HERE");
 document.getElementById("name_form").onsubmit = onPlay;
 var count = 0;
 
@@ -33,17 +31,10 @@ function socketStuff(formData) {
     }
 
     this.socket.onmessage = (event) => {
-        if (count < 3) {
-            console.log(event.data);
-            console.log(JSON.parse(event.data));
-            count++;
-        }
-
         const data = JSON.parse(event.data);
         switch (data.messageType) {
             case 'join_game_success':
                 //Initialize player attributes
-                console.log("JOIN GAME SUCCESS");
                 initializeWorldObjects();
                 player = {
                     x: 0, y: 0, w: 50, h: 50, oldX: 0, oldY: 0, xVel: 0, yVel: 0, name: "None", health: 100, maxHealth: 100,
@@ -210,10 +201,9 @@ function socketStuff(formData) {
                 }));
                 break;
             case 'player_respawn_success':
-                respawnSuccess(data);
+                respawnSuccess(data.position);
                 break;
             case 'disconnect':
-                console.log("SHUT DOWN");
                 toMenu();
                 break;
         }
@@ -226,7 +216,7 @@ function sendBullet() {
 }
 
 function sendUpgradeRequest(upgradeNum) {
-    socket.send(JSON.stringify({messageType: 'upgrade_Request', upgradeNum: upgradeNum}));
+    socket.send(JSON.stringify({messageType: 'upgrade_request', upgradeNum: upgradeNum}));
 }
 
 

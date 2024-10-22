@@ -32,7 +32,14 @@ class SocketEntryPoint {
             rawSendData = JSON.stringify(msg);
         }
 
-        this.uuidToWs.get(uuid).send(rawSendData);
+        const socket = this.uuidToWs.get(uuid);
+        if (socket != undefined) {
+            socket.send(rawSendData);
+        } else {
+            console.log("INVALID SOCKET ID: ", uuid);
+
+        }
+
     }
 
     userConnected(uuid, ws) {
@@ -41,8 +48,6 @@ class SocketEntryPoint {
 
     onMessage(uuid, data) {
         data = JSON.parse(data);
-        console.log("DATA");
-        console.log(data);
         if (data.messageType == undefined) throw "Bad message type";
         const socket = this.uuidToWs.get(uuid);
         if (socket == undefined) throw "No user with this id";
@@ -74,7 +79,6 @@ class SocketEntryPoint {
                 break;
             case "player_input":
                 try {
-                    console.log(data);
                     if (data == undefined) throw "Undefined data";
                     if (this.gameLoop.world.players.get(uuid) == undefined) throw "Not a player";
                     this.gameLoop.world.playerInput(uuid, data);

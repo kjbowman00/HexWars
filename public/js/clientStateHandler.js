@@ -2,7 +2,6 @@ let loopID;
 var gameRunning = false;
 var menuRunning = true;
 function gameStart() {
-	console.log("STARTING GAME");
 	alive = true;
 	//Turn on canvas
 	document.getElementById('canvas_holder').style.display = 'block';
@@ -44,8 +43,8 @@ function died() {
 }
 
 function respawnRequest() {
-	socket.emit('player_respawn_request');
-	console.log("Respawn request");
+	const respawnRequest = JSON.stringify({messageType: 'player_respawn_request'});
+	socket.send(respawnRequest);
 }
 
 function respawnSuccess(pos) {

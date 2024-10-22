@@ -237,7 +237,7 @@ var update = function (deltaTime, io) {
 				if (currentPlayer.timeDead > 60) {
 					//Remove them from the server
 					io.kickPlayer(key);
-					playersToKick.push(currentPlayer);
+					playersToKick.push(key);
 				}
 			}
 		}
@@ -434,9 +434,7 @@ var sendUpdates = function (io) {
 
 			let finalObj = {};
 			finalObj.messageType = 'state';
-			console.log(value);
 			finalObj.player = getSelfStripped(value);
-			console.log(finalObj.player);
 			finalObj.objects = objectsToSend;
 			if (value.lastLeaderBoardState < leaderboard.getStateNum()) {
 				finalObj.leaderboard = leaderboardToSend;

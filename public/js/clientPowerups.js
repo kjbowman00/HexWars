@@ -93,14 +93,10 @@ function handleInitialPowerup(playerState) {
 		if (previousPowerup != null) {
 			if (newPowerup.timeLeft > previousPowerup.timeLeft) {
 				//Powerup was RE-activated
-				console.log("POWERUP REACTIVATED");
-				console.log(newPowerup);
 			}
 		} else {
 			//Powerup activated
 			//Play sound, animation
-			console.log("POWERUP ACTIVATED");
-			console.log(newPowerup);
 			Sounds.playPowerup(newPowerup.type);
 		}
 	}
