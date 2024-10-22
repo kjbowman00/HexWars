@@ -1,42 +1,39 @@
-const tickLengthMs = 1000 / 60;
-const outputTickLengthMs = 1000 / 20;
-var previousTick = Date.now();
-var previousOutputTick = Date.now();
 var io;
-
 var world = require('./world.js');
 
-var start = Date.now();
+const nanoToSecondsMultiple = 0.000000001;
+const nanoToMilliMultiple = 0.000001;
+var previousEndTime = getCurrentTimeSecondsDecimal();
+const loop = function() {
+    var timeBeginLoop = getCurrentTimeSecondsDecimal();
+    var deltaTime = timeBeginLoop - previousEndTime;
 
-var loop = function () {
-	var now = Date.now();
+    // Update
+	world.update(deltaTime, io);
+	world.sendUpdates(io);
 
-	//Has tickLength in ms passed since last update?
-	if (previousTick + tickLengthMs <= now) {
-		var deltaTime = (now - previousTick) / 1000; // Number of seconds since last update
-		previousTick = now;
+    // wait 20 ms (tick rate) minus how much time this tick took to complete (5ms of game logic for example) == 15ms till next tick needs to run.
+    const gameLogicTimeTaken = getCurrentTimeSecondsDecimal() - timeBeginLoop;
+    previousEndTime = getCurrentTimeSecondsDecimal();
+    const waitTime = 20 - (gameLogicTimeTaken * 1000);
+    if (waitTime < 1) {
+        setImmediate(loop);
+    } else {
+        setTimeout(loop, waitTime);
+    }
+}
 
-		//Update
-		world.update(deltaTime, io);
-	}
-
-	if (previousOutputTick + outputTickLengthMs <= now) {
-		previousOutputTick = now;
-		world.sendUpdates(io);
-	}
-
-	//Determine whether to immediately loop again or wait a bit
-	//16 is the variability in setTimeout in ms
-	if (Date.now() - previousTick < tickLengthMs - 16) {
-		setTimeout(loop);
-	} else {
-		setImmediate(loop);
-	}
-};
+function getCurrentTimeSecondsDecimal() {
+    const time = process.hrtime();
+    const seconds = time[0];
+    const decimalSeconds = time[1] * nanoToSecondsMultiple;
+    return seconds + decimalSeconds;
+}
 
 var getStarted = function (ioObject) {
 	io = ioObject;
 	loop();
 };
+
 exports.world = world;
 exports.getStarted = getStarted;
