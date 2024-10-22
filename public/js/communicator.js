@@ -218,14 +218,3 @@ function sendBullet() {
 function sendUpgradeRequest(upgradeNum) {
     socket.send(JSON.stringify({messageType: 'upgrade_request', upgradeNum: upgradeNum}));
 }
-
-
-//Grab player count of server
-//TODO: Remove this?
-window.fetch("/game1/playerCount").then(function (response) {
-    return response.json();
-}).then(function (data) {
-    let playerInfo = document.getElementById("server_selection_input").children[0];
-    playerInfo.innerHTML = "Game 1: " + data.playerCount + " / " + data.MAX_PLAYERS + " Players";
-}).catch(function () {
-});
