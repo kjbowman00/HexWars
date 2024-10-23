@@ -27,6 +27,11 @@ wss.on('connection', function connection(ws) {
     ws.on('message', function message(data) { 
       socketEntryPoint.onMessage(uuid, data);
     });
+
+    ws.on('close', function(event) {
+      console.log("SHIT CLOSING");
+      socketEntryPoint.userLostConnection(uuid);
+    });
   });
 
 gameLoop.getStarted(socketEntryPoint);

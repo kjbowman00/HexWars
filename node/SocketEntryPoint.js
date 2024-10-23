@@ -8,15 +8,16 @@ const colorPalette = [
 
 class SocketEntryPoint {
 
-    users; // UUID string list
     uuidToWs; // map of uuid to ws
     gameLoop;
 
     constructor(gameLoop) {
+        this.numUsers = 0;
         this.uuidToWs = new Map();
         this.gameLoop = gameLoop;
     }
 
+    // Calls when a player is dead for too long
     kickPlayer(uuid) {
         if (this.uuidToWs.has(uuid)) {
             this.uuidToWs.get(uuid).close();
@@ -36,14 +37,25 @@ class SocketEntryPoint {
         if (socket != undefined) {
             socket.send(rawSendData);
         } else {
-            console.log("INVALID SOCKET ID: ", uuid);
+            // console.log("INVALID SOCKET ID: ", uuid);
 
         }
 
     }
 
+
     userConnected(uuid, ws) {
         this.uuidToWs.set(uuid, ws);
+        this.gameLoop.pauseUpdates(false);
+    }
+
+    userLostConnection(uuid) {
+        console.log("USER GETTING GONE");
+        this.kickPlayer(uuid);
+        this.gameLoop.world.removePlayer(uuid);
+        if (this.uuidToWs.size == 0) {
+            this.gameLoop.pauseUpdates(true);
+        }
     }
 
     onMessage(uuid, data) {
