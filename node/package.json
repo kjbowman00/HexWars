@@ -4,7 +4,7 @@
   "description": "Multiplayer real-time 2d arcade shooter",
   "main": "gameRoom.js",
   "dependencies": {
-    "express": "^4.17.3",
+    "express": "^4.20.0",
     "helmet": "^4.4.1",
     "node": "^15.7.0",
     "npm": "^9.6.4",
