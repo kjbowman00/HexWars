@@ -1,5 +1,5 @@
 # HexWars
-# Available at http://hexwars.net
+# Available at http://hex-wars.net
 ## HexWars is a real-time multiplayer arcade shooter web game
 ![Main Menu Screen](/public/images/main_menu_preview.png)
 
